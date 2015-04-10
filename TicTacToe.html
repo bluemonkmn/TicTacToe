@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head><title>Ben's Tic Tac Toe</title></head>
+<body>
+<style>
+circle,path { fill: none; stroke-width:3; visibility: hidden; stroke-linecap:round }
+.p1 { stroke: green}
+.p2 { stroke: red}
+line { stroke:black;stroke-width:3 }
+.win {visibility: hidden; stroke: blue}
+</style>
+<svg id="gameView" width="300" height="300">
+   <line x1="100" y1="0" x2="100" y2="300" />
+   <line x1="200" y1="0" x2="200" y2="300" />
+   <line x1="0" y1="100" x2="300" y2="100" />
+   <line x1="0" y1="200" x2="300" y2="200" />
+   <circle id="o11" cx="50" cy="50" r="40" class="p1" />
+   <path id="x11" d="M 5 5 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o21" cx="150" cy="50" r="40" class="p1" />
+   <path id="x21" d="M 105 5 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o31" cx="250" cy="50" r="40" class="p1" />
+   <path id="x31" d="M 205 5 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o12" cx="50" cy="150" r="40" class="p1" />
+   <path id="x12" d="M 5 105 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o22" cx="150" cy="150" r="40" class="p1" />
+   <path id="x22" d="M 105 105 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o32" cx="250" cy="150" r="40" class="p1" />
+   <path id="x32" d="M 205 105 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o13" cx="50" cy="250" r="40" class="p1" />
+   <path id="x13" d="M 5 205 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o23" cx="150" cy="250" r="40" class="p1" />
+   <path id="x23" d="M 105 205 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <circle id="o33" cx="250" cy="250" r="40" class="p1" />
+   <path id="x33" d="M 205 205 l 90 90 m 0 -90 l -90 90" class="p2" />
+   <line id="col1" x1="50" y1="5" x2="50" y2="295" class = "win" />
+   <line id="col2" x1="150" y1="5" x2="150" y2="295" class = "win" />
+   <line id="col3" x1="250" y1="5" x2="250" y2="295" class = "win" />
+   <line id="row1" x1="5" y1="50" x2="295" y2="50" class = "win" />
+   <line id="row2" x1="5" y1="150" x2="295" y2="150" class = "win" />
+   <line id="row3" x1="5" y1="250" x2="295" y2="250" class = "win" />
+   <line id="diag1" x1="5" y1="5" x2="295" y2="295" class = "win" />
+   <line id="diag2" x1="295" y1="5" x2="5" y2="295" class = "win" />
+</svg><br />
+<input id="autoMove" type="button" value="Auto Move" />
+<input id="reset" type="button" value = "Reset" />
+<script>
+function Board() {
+   this.cells =
+      [[0,0,0],
+       [0,0,0],
+       [0,0,0]];
+   this.turn = 1;
+}
+Board.prototype.show = function() {
+   for(var row = 0; row < 3; row++)
+      for(var col = 0; col < 3; col++) {
+         var p1Elem = document.getElementById("o" + (col+1) + (row+1));
+         var p2Elem = document.getElementById("x" + (col+1) + (row+1));
+         if (this.cells[row][col] == 1)
+            p1Elem.style.visibility = "visible";
+         else
+            p1Elem.style.visibility = "hidden";
+         if (this.cells[row][col] == 2)
+            p2Elem.style.visibility = "visible";
+         else
+            p2Elem.style.visibility = "hidden";
+      }
+   var w = this.getWinner();
+   if (w == 0) {
+      for (i=0; i<3; i++) {
+         document.getElementById('col' + (i+1)).style.visibility = 'hidden';
+         document.getElementById('row' + (i+1)).style.visibility = 'hidden';
+      }
+      document.getElementById('diag1').style.visibility = 'hidden';
+      document.getElementById('diag2').style.visibility = 'hidden';
+   } else
+      document.getElementById(w.line).style.visibility = 'visible';
+};
+Board.prototype.applyMove = function(move) {
+   this.cells[move[1]-1][move[0]-1] = this.turn;
+   this.turn = 3 - this.turn;
+};
+Board.prototype.getValidMoves = function() {
+   var moves = [];
+   for (var col = 0; col < 3; col++)
+      for (var row = 0; row < 3; row++)
+         if (this.cells[row][col] == 0)
+            moves.push("" + (col+1) + (row+1));
+   return moves;
+};
+Board.prototype.getWinner = function() {
+   for(var i = 0; i < 3; i++) {
+      if (this.cells[i][0] && this.cells[i][0] == this.cells[i][1] && this.cells[i][0] == this.cells[i][2])
+         return {'player': this.cells[i][0], 'line': 'row' + (i+1)};
+      if (this.cells[0][i] && this.cells[0][i] == this.cells[1][i] && this.cells[0][i] == this.cells[2][i])
+         return {'player': this.cells[0][i], 'line': 'col' + (i+1)};
+   }
+   if (this.cells[0][0] && this.cells[0][0] == this.cells[1][1] && this.cells[0][0] == this.cells[2][2])
+      return {'player': this.cells[0][0], 'line':'diag1'};
+   if (this.cells[2][0] && this.cells[2][0] == this.cells[1][1] && this.cells[2][0] == this.cells[0][2])
+      return {'player': this.cells[2][0], 'line':'diag2'};
+   return 0;
+};
+Board.prototype.clone = function() {
+   var result = new Board();
+   for (var row = 0; row < 3; row++)
+      for (var col = 0; col < 3; col++)
+         result.cells[row][col] = this.cells[row][col];
+   result.turn = this.turn;
+   return result;
+}
+Board.prototype.getBestMove = function() {
+   var winner = this.getWinner().player;
+   if (winner) return {'winner':winner, 'depth':0};
+   var moves = this.getValidMoves();
+   if (moves.length == 0)      
+      return {'winner':0, 'depth':0};
+
+   var bestWinner = -1;
+   var bestMove;
+   
+   for (var midx=0; midx<moves.length; midx++) {
+      var nextBoard = this.clone();
+      nextBoard.applyMove(moves[midx]);
+      var winner = nextBoard.getWinner().player;
+      if (winner == this.turn)
+         return {'winner':winner, 'depth':1, 'move':moves[midx]};
+      var nextBest = nextBoard.getBestMove();
+      if ((bestWinner < 0) || (nextBest.winner == this.turn)
+         || ((nextBest.winner == 0) && (bestWinner != this.turn))
+         || ((nextBest.winner == 0) && (bestWinner == this.turn)) && (bestMove.depth > nextBest.depth)) {
+         bestWinner = nextBest.winner;
+         bestMove = {'winner': nextBest.winner, 'depth': nextBest.depth + 1, 'move':moves[midx]};
+      }
+   }
+   return bestMove;
+}
+var gameBoard = new Board();
+document.getElementById("gameView").onclick = function(e) {
+   var col = Math.floor(e.offsetX / 100);
+   var row = Math.floor(e.offsetY / 100);
+   if ((col >= 0) && (row >= 0) && (col < 3) && (row < 3)) {
+      var move = "" + (col+1) + (row+1);
+      if (gameBoard.getValidMoves().indexOf(move) >= 0) {
+         gameBoard.applyMove(move);
+         gameBoard.show();
+      }
+   }
+}
+document.getElementById("autoMove").onclick = function() {
+   var move = gameBoard.getBestMove();
+   if (move.move) {
+      gameBoard.applyMove(move.move);
+      gameBoard.show();
+   }
+}
+document.getElementById("reset").onclick = function() {
+   gameBoard = new Board();
+   gameBoard.show();
+}
+</script>
+</html>
