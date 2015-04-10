@@ -66,7 +66,7 @@ Board.prototype.show = function() {
             p2Elem.style.visibility = "hidden";
       }
    var w = this.getWinner();
-   if (w == 0) {
+   if (w.player == 0) {
       for (i=0; i<3; i++) {
          document.getElementById('col' + (i+1)).style.visibility = 'hidden';
          document.getElementById('row' + (i+1)).style.visibility = 'hidden';
@@ -99,7 +99,7 @@ Board.prototype.getWinner = function() {
       return {'player': this.cells[0][0], 'line':'diag1'};
    if (this.cells[2][0] && this.cells[2][0] == this.cells[1][1] && this.cells[2][0] == this.cells[0][2])
       return {'player': this.cells[2][0], 'line':'diag2'};
-   return 0;
+   return {'player':0};
 };
 Board.prototype.clone = function() {
    var result = new Board();
@@ -126,9 +126,16 @@ Board.prototype.getBestMove = function() {
       if (winner == this.turn)
          return {'winner':winner, 'depth':1, 'move':moves[midx]};
       var nextBest = nextBoard.getBestMove();
-      if ((bestWinner < 0) || (nextBest.winner == this.turn)
-         || ((nextBest.winner == 0) && (bestWinner != this.turn))
-         || ((nextBest.winner == 0) && (bestWinner == this.turn)) && (bestMove.depth > nextBest.depth)) {
+      var foundBetter = false ;
+      if (bestWinner < 0)
+         foundBetter = true;
+      else if (bestWinner == this.turn)
+         foundBetter = nextBest.winner == this.turn && bestMove.depth > nextBest.depth;
+      else if (bestWinner == 0)
+         foundBetter = nextBest.winner == this.turn || nextBest.winner == 0 && bestMove.depth > nextBest.depth;
+      else
+         foundBetter = nextBest.winner != 3 - this.turn || bestMove.depth < nextBest.depth;
+      if (foundBetter) {
          bestWinner = nextBest.winner;
          bestMove = {'winner': nextBest.winner, 'depth': nextBest.depth + 1, 'move':moves[midx]};
       }
